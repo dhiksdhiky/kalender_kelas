@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
+
+    <style>
+      :root {
+        --google-blue: #4285F4;
+        --google-red: #DB4437;
+        --google-grey: #757575;
+        --light-grey: #f0f0f0;
+        --border-color: #e0e0e0;
+        --text-color: #333;
+        --label-color: #555;
+        --container-padding: 15px;
+      }
+
+      body {
+        font-family: 'Roboto', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #f7f9fa;
+        color: var(--text-color);
+        font-size: 14px;
+      }
+
+      .main-container {
+        display: flex;
+        flex-grow: 1;
+        overflow: hidden;
+        flex-direction: row;
+      }
+
+      .calendar-pane,
+      .details-pane {
+        padding: var(--container-padding);
+        overflow-y: auto;
+        box-sizing: border-box;
+      }
+
+      .calendar-pane {
+        width: 70%;
+        border-right: 1px solid var(--border-color);
+        background-color: #fff;
+      }
+
+      .details-pane {
+        width: 30%;
+        background-color: #fff;  /* bisa disesuaikan, kompisisi kalender dan detail (70 30) */
+      }
+      
+      .form-section, .agenda-list-section, .agenda-display {
+        margin-bottom: 20px;
+      }
+
+      .pane-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--light-grey);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+      }
+
+      .pane-header h4 {
+        margin-top: 0;
+        margin-bottom: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+        font-weight: 500;
+        color: var(--text-color);
+      }
+        h4:not(.pane-header h4), h5 {
+        color: var(--text-color);
+        border-bottom: 1px solid var(--light-grey);
+        padding-bottom: 10px;
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-weight: 500;
+      }
+      .details-pane .agenda-list-section h4,
+      .details-pane .form-section h4 {
+        border-bottom: 1px solid var(--light-grey);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        font-weight: 500;
+        color: var(--text-color);
+        margin-top:0;
+      }
+      h5 { /* Styling for #selectedAgendaTitle */
+        font-size: 1.2em; /* bikin gedean dikit */
+        border-bottom: none;
+        margin-bottom: 5px; /* kurangin margin */
+      }
+
+      .button-link-spreadsheet {
+        display: inline-block;
+        padding: 6px 12px;
+        background-color: var(--google-blue);
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+        line-height: normal;
+      }
+      .button-link-spreadsheet:hover {
+        background-color: #357ae8;
+        color: white;
+      }
+
+      label {
+        display: block;
+        margin-top: 12px;
+        margin-bottom: 5px;
+        font-weight: 500;
+        font-size: 0.95em;
+        color: var(--label-color);
+      }
+
+      input[type="text"],
+      input[type="datetime-local"],
+      input[type="file"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 6px 12px; 
+        height: 36px; 
+        margin-top: 3px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 1em;
+        background-color: #fff;
+      }
+      input[type="file"] {
+        padding: 4px; 
+      }
+      select { 
+        height: 36px;
+        padding: 0px 10px; 
+      }
+      textarea {
+        min-height: 100px;
+        height: auto; 
+        padding: 10px; 
+        resize: vertical;
+      }
+      input:focus, select:focus, textarea:focus, input[type="file"]:focus {
+        border-color: var(--google-blue);
+        box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        outline: none;
+      }
+      
+      .form-buttons-container {
+        text-align: center; 
+        margin-top: 25px; 
+        padding-bottom: 10px;
+      }
+
+      #agendaForm .form-buttons-container button {
+        padding: 10px 20px;
+        font-size: 0.95em; 
+        font-weight: 500;
+        border-radius: 4px; 
+        cursor: pointer;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        margin-left: 8px; 
+        margin-right: 8px;
+        min-width: 110px; 
+        border: none; 
+        color: rgb(0, 0, 0) !important; 
+        line-height: normal; 
+      }
+
+      #agendaForm .form-buttons-container button.button-primary {
+        background-color: var(--google-blue) !important;
+      }
+      #agendaForm .form-buttons-container button.button-primary:hover:not(:disabled) {
+        background-color: #357ae8 !important; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15) !important;
+      }
+
+      #agendaForm .form-buttons-container button.button-tertiary {
+        background-color: var(--google-grey) !important;
+        color: rgb(0, 0, 0) !important;
+      }
+      #agendaForm .form-buttons-container button.button-tertiary:hover:not(:disabled) {
+        background-color: #616161 !important;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15) !important;
+      }
+
+      #agendaForm .form-buttons-container button.button-secondary {
+        background-color: var(--google-red) !important;
+      }
+      #agendaForm .form-buttons-container button.button-secondary:hover:not(:disabled) {
+        background-color: #c5372c !important;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15) !important;
+      }
+      
+      #agendaForm .form-buttons-container button:disabled {
+        background-color: #e0e0e0 !important; 
+        color: #000000 !important; 
+        cursor: not-allowed !important;
+        box-shadow: none !important;
+      }
+
+      #calendar {
+        max-width: 100%;
+        margin: 0 auto;
+        height: 450px; 
+      }
+      .fc-event { cursor: pointer; }
+      .fc-event[data-event-type="Tugas"] { background-color: #E67E22; border-color: #D35400; }
+      .fc-event[data-event-type="Kuis"] { background-color: #9B59B6; border-color: #8E44AD; }
+      .fc-event[data-event-type="Pengingat"] { background-color: #3498DB; border-color: #2980B9; }
+      .fc-event[data-event-type="Lainnya"] { background-color: #7F8C8D; border-color: #607D8B; }
+      .fc-event-past { 
+        opacity: 0.65;
+        background-color: #bdc3c7 !important; 
+        border-color: #95a5a6 !important;
+      }
+
+      .agenda-display {
+        margin-top: 20px;
+        border-top: 1px dashed var(--border-color);
+        padding-top: 15px;
+      }
+      .agenda-display p {
+        margin: 8px 0; /* Increased spacing for details paragraphs */
+        line-height: 1.5;
+      }
+      .agenda-display strong {
+        color: var(--label-color);
+      }
+      .agenda-display a {
+        color: var(--google-blue);
+        text-decoration: none;
+      }
+      .agenda-display a:hover {
+        text-decoration: underline;
+      }
+      
+      /* New style for the prominent attachment button */
+      .attachment-button {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: var(--google-blue);
+        color: white !important;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: 500;
+        margin-top: 8px; /* Space above the button */
+        margin-bottom: 15px; /* Space below the button */
+        transition: background-color 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+      }
+      .attachment-button:hover {
+        background-color: #357ae8;
+        color: white !important;
+      }
+      .attachment-button svg { /* Basic icon styling */
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+
+
+      .agenda-item {
+        border: 1px solid var(--border-color);
+        background-color: #fff;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .agenda-item:hover {
+        background-color: var(--light-grey);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      .agenda-item strong {
+        color: var(--google-blue);
+        font-weight: 500;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .agenda-item small {
+        font-size: 0.85em;
+        color: #666;
+      }
+      .agenda-item.agenda-item-past {
+        background-color: #fdfdfd;
+        opacity: 0.85;
+      }
+      .agenda-item.agenda-item-past strong {
+        color: var(--google-grey);
+      }
+
+      .loading, .message {
+        text-align: center;
+        padding: 20px;
+        color: #555;
+        font-style: italic;
+      }
+
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: var(--light-grey); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #bbb; }
+
+      @media (max-width: 768px) {
+        .main-container { flex-direction: column; }
+        .calendar-pane, .details-pane { width: 100%; border-right: none; }
+        .calendar-pane { border-bottom: 1px solid var(--border-color); }
+        #calendar { height: auto; min-height: 400px; }
+        .fc .fc-toolbar.fc-header-toolbar { font-size: 0.85em; flex-direction: column; align-items: stretch; }
+        .fc .fc-toolbar.fc-header-toolbar .fc-toolbar-chunk { display: flex; justify-content: space-around; margin-bottom: 5px; }
+        body { font-size: 15px; }
+        
+        .form-buttons-container {
+            display: flex; 
+            flex-direction: column; 
+            align-items: stretch; 
+        }
+        #agendaForm .form-buttons-container button { 
+            width: 100% !important; 
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            margin-bottom: 10px !important; 
+        }
+        #agendaForm .form-buttons-container button:last-child {
+            margin-bottom: 0 !important;
+        }
+      }
+
+      @media (max-width: 480px) {
+        :root { --container-padding: 10px; }
+        .pane-header h4, h4:not(.pane-header h4), .details-pane .agenda-list-section h4, .details-pane .form-section h4 { font-size: 1.2em; }
+        .agenda-display h5 { font-size: 1.1em; }
+        input[type="text"], input[type="datetime-local"], input[type="file"], select, textarea { padding: 12px; height: 40px; } 
+        input[type="file"] { padding: 8px; } 
+        select { height: 40px; padding: 0px 10px;}
+        textarea {height: auto;}
+        .fc .fc-toolbar.fc-header-toolbar { font-size: 0.8em; }
+        .button-link-spreadsheet { padding: 5px 10px; font-size: 0.8em; }
+        .attachment-button { width: 100%; box-sizing: border-box;}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container" id="appContent">
+      <div class="calendar-pane">
+        <div class="pane-header">
+          <h4>Kalender Agenda</h4>
+          <a href="https://docs.google.com/spreadsheets/d/1Rv1x6eeY6DXiZKX-hOSTkH9LcsD07ZymeOV51CEt9gI/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="button-link-spreadsheet" title="Buka Spreadsheet Sumber"> <!-- ISI LINK SPREADSHEET, TINGGAL COPAS -->
+            Buka Sheet
+          </a>
+        </div>
+        <div id='calendar'></div>
+        <div class="agenda-display">
+            <h5 id="selectedAgendaTitle">Agenda Terpilih:</h5>
+            <div id="selectedAgendaAttachment"></div> 
+            <div id="selectedAgendaDetails">Pilih agenda dari kalender atau daftar.</div>
+        </div>
+      </div>
+
+      <div class="details-pane">
+        <div class="form-section">
+          <h4 id="formTitle">Tambah Agenda Baru</h4>
+          <form id="agendaForm">
+            <input type="hidden" id="rowId">
+            <label for="jenisAgenda">Jenis Agenda:</label>
+            <select id="jenisAgenda" name="jenisAgenda">
+              <option value="Tugas">Tugas</option>
+              <option value="Kuis">Kuis</option>
+              <option value="Pengingat">Pengingat</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+            <label for="namaAgenda">Nama Agenda:</label>
+            <input type="text" id="namaAgenda" name="namaAgenda" required>
+            
+            <label for="deadline">Deadline:</label>
+            <input type="datetime-local" id="deadline" name="deadline" required>
+            
+            <label for="pic">PIC:</label>
+            <input type="text" id="pic" name="pic" list="picOptions">
+            <datalist id="picOptions">
+              </datalist>
+
+            <label for="keterangan">Keterangan:</label>
+            <textarea id="keterangan" name="keterangan"></textarea>
+
+            <label for="lampiranFile">Lampiran (Opsional):</label>
+            <input type="file" id="lampiranFile" name="lampiranFile">
+            <small id="currentLinkFile" style="display: block; margin-top: 5px;"></small>
+
+
+            <div class="form-buttons-container">
+              <button type="button" class="button-primary" id="simpanButton" onclick="submitAgenda()">Simpan Agenda</button>
+              <button type="button" class="button-tertiary" id="baruButton" onclick="clearForm()">Baru</button>
+              <button type="button" class="button-secondary" id="deleteButton" onclick="deleteCurrentAgenda()" style="display:none;">Hapus</button>
+            </div>
+          </form>
+        </div>
+        <hr style="margin: 20px 0;">
+        <div class="agenda-list-section">
+            <h4 id="activeAgendaTitle">Agenda Outstanding (30 Hari ke Depan)</h4> <div id="activeAgendaList"><div class="loading">Memuat agenda aktif...</div></div>
+        </div>
+        <hr style="margin: 20px 0;">
+        <div class="agenda-list-section">
+            <h4 id="pastAgendaTitle">Agenda Sudah Lewat (30 Hari Terakhir)</h4> <div id="pastAgendaList"><div class="loading">Memuat agenda lewat...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var calendar;
+      var allLoadedAgenda = []; 
+      var currentEditingRowId = null;
+
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('appContent').style.display = 'flex';
+        initializeFullCalendar(); 
+        loadAnggotaOptions();
+        loadAndDisplayAllAgenda();
+        // Modal related window.onclick REMOVED
+      });
+
+      function initializeFullCalendar() {
+        if (calendar) return; 
+        var calendarEl = document.getElementById('calendar');
+        calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth',
+          locale: 'id',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+          },
+          events: function(fetchInfo, successCallback, failureCallback) {
+            google.script.run
+              .withSuccessHandler(function(agendaArray) {
+                if (agendaArray.error) {
+                  showError({ message: agendaArray.error });
+                  failureCallback(new Error(agendaArray.error));
+                  return;
+                }
+                allLoadedAgenda = agendaArray; 
+                successCallback(formatAgendaForCalendar(allLoadedAgenda));
+              })
+              .withFailureHandler(function(err) {
+                showError(err);
+                failureCallback(err);
+              })
+              .getAgendaData();
+          },
+          eventClick: function(info) {
+            var clickedAgenda = allLoadedAgenda.find(a => a.rowId === info.event.id);
+            if (clickedAgenda) {
+              populateFormForEdit(clickedAgenda);
+              displaySelectedAgendaDetails(clickedAgenda);
+              if (window.innerWidth < 768) {
+                document.getElementById('formTitle').scrollIntoView({ behavior: 'smooth' });
+              }
+            }
+          },
+          dateClick: function(info) {
+            clearForm();
+            let deadlineDateStr = info.dateStr;
+            if (!deadlineDateStr.includes('T')) { 
+              const dateObj = new Date(info.dateStr);
+              if(!isNaN(dateObj.valueOf())){ 
+                const year = dateObj.getFullYear();
+                const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                const day = dateObj.getDate().toString().padStart(2, '0');
+                deadlineDateStr = `${year}-${month}-${day}T12:00`; 
+              } else {
+                deadlineDateStr = ''; 
+              }
+            }
+            document.getElementById('deadline').value = deadlineDateStr;
+            document.getElementById('namaAgenda').focus();
+            // Clear attachment and details when clicking a new date
+            document.getElementById('selectedAgendaAttachment').innerHTML = ''; 
+            document.getElementById('selectedAgendaDetails').innerHTML = 'Tambah agenda baru untuk ' + new Date(info.dateStr).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('selectedAgendaTitle').textContent = 'Agenda Terpilih:';
+
+
+            if (window.innerWidth < 768) {
+              document.getElementById('formTitle').scrollIntoView({ behavior: 'smooth' });
+            }
+          },
+          windowResize: function(arg) {
+            if (window.innerWidth < 768 && calendar.view.type !== 'listWeek') {
+              calendar.changeView('listWeek');
+            } else if (window.innerWidth >= 768 && calendar.view.type !== 'dayGridMonth') {
+              calendar.changeView('dayGridMonth');
+            }
+          },
+          eventDidMount: function(info) {
+            if (info.event.extendedProps && info.event.extendedProps.jenisAgenda) {
+              info.el.setAttribute('data-event-type', info.event.extendedProps.jenisAgenda);
+            }
+            var now = new Date();
+            var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            var eventStart = info.event.start; 
+            if (eventStart && eventStart < todayStart) {
+              info.el.classList.add('fc-event-past');
+            }
+          },
+          editable: false 
+        });
+        calendar.render();
+      }
+
+      function loadAnggotaOptions() {
+        google.script.run
+          .withSuccessHandler(function(namaArray) {
+            var dataList = document.getElementById('picOptions');
+            dataList.innerHTML = ''; 
+            if (namaArray && namaArray.length > 0) {
+              namaArray.forEach(function(nama) {
+                var option = document.createElement('option');
+                option.value = nama;
+                dataList.appendChild(option);
+              });
+            }
+          })
+          .withFailureHandler(showError) 
+          .getNamaAnggota(); 
+      }
+
+      function formatAgendaForCalendar(agendaArray) {
+        if (!agendaArray || agendaArray.error) return [];
+        return agendaArray.map(function(agenda) {
+          return {
+            id: agenda.rowId,
+            title: agenda.namaAgenda,
+            start: agenda.deadline, 
+            allDay: false, 
+            extendedProps: {
+                jenisAgenda: agenda.jenisAgenda,
+                pic: agenda.pic,
+                keterangan: agenda.keterangan,
+                tanggalLoad: agenda.tanggalLoad, 
+                linkFile: agenda.linkFile, 
+                fullAgenda: agenda 
+            },
+          };
+        });
+      }
+      
+      function createAgendaItemElement(agenda, isPast) {
+        var itemDiv = document.createElement('div');
+        itemDiv.className = 'agenda-item';
+        if (isPast) {
+            itemDiv.classList.add('agenda-item-past');
+        }
+        let tanggalLoadInfo = '';
+        if (agenda.tanggalLoad) {
+            tanggalLoadInfo = ` | Dibuat: ${new Date(agenda.tanggalLoad).toLocaleDateString('id-ID', {day:'2-digit', month:'short'})}`;
+        }
+        let linkFileInfo = ''; 
+        if (agenda.linkFile) { 
+            linkFileInfo = ` | <a href="${agenda.linkFile}" target="_blank" title="Lihat Lampiran" onclick="event.stopPropagation();">Lampiran</a>`;
+        }
+
+        itemDiv.innerHTML = `<strong>${agenda.namaAgenda}</strong>
+                             <small>Jenis: ${agenda.jenisAgenda || '-'} | Deadline: ${agenda.deadline ? new Date(agenda.deadline).toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) : 'N/A'}${tanggalLoadInfo}${linkFileInfo}</small>`;
+        itemDiv.onclick = function(event) {
+            // Stop propagation if the click was on the link itself
+            if (event.target.tagName === 'A') { 
+                return;
+            }
+            populateFormForEdit(agenda);
+            displaySelectedAgendaDetails(agenda);
+            if (window.innerWidth < 768) {
+                document.getElementById('formTitle').scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+        return itemDiv;
+      }
+
+      function displayCategorizedAgendas(agendaArray) {
+        var activeListDiv = document.getElementById('activeAgendaList');
+        var pastListDiv = document.getElementById('pastAgendaList');
+        activeListDiv.innerHTML = ''; 
+        pastListDiv.innerHTML = '';   
+
+        if (!agendaArray || agendaArray.error || agendaArray.length === 0) {
+            const noAgendaMessage = agendaArray.error ? 'Gagal memuat data agenda.' : 'Belum ada agenda.';
+            activeListDiv.innerHTML = `<div class="message">${agendaArray.error ? noAgendaMessage : 'Tidak ada agenda aktif dalam 30 hari ke depan.'}</div>`;
+            pastListDiv.innerHTML = `<div class="message">${agendaArray.error ? '' : 'Tidak ada agenda yang sudah lewat dalam 30 hari terakhir.'}</div>`;
+            if(agendaArray.error) console.error("Error displaying agendas:", agendaArray.error);
+            return;
+        }
+
+        var now = new Date(); 
+        var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()); 
+        var limitFuture = new Date(todayStart);
+        limitFuture.setDate(todayStart.getDate() + 30); 
+        var limitPast = new Date(todayStart);
+        limitPast.setDate(todayStart.getDate() - 30); 
+
+        var activeAgendasFiltered = [];
+        var pastAgendasFiltered = [];
+
+        agendaArray.forEach(function(agenda) {
+            if (!agenda.deadline) return; 
+            var deadlineDate = new Date(agenda.deadline);
+            if (deadlineDate >= todayStart && deadlineDate < limitFuture) activeAgendasFiltered.push(agenda);
+            else if (deadlineDate < todayStart && deadlineDate >= limitPast) pastAgendasFiltered.push(agenda);
+        });
+
+        if (activeAgendasFiltered.length > 0) {
+            activeAgendasFiltered.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+            activeAgendasFiltered.forEach(function(agenda) { activeListDiv.appendChild(createAgendaItemElement(agenda, false)); });
+        } else {
+            activeListDiv.innerHTML = '<div class="message">Tidak ada agenda aktif dalam 30 hari ke depan.</div>';
+        }
+
+        if (pastAgendasFiltered.length > 0) {
+            pastAgendasFiltered.sort((a, b) => new Date(b.deadline) - new Date(a.deadline));
+            pastAgendasFiltered.forEach(function(agenda) { pastListDiv.appendChild(createAgendaItemElement(agenda, true)); });
+        } else {
+            pastListDiv.innerHTML = '<div class="message">Tidak ada agenda yang sudah lewat dalam 30 hari terakhir.</div>';
+        }
+      }
+
+      function loadAndDisplayAllAgenda() {
+        document.getElementById('activeAgendaList').innerHTML = '<div class="loading">Memuat agenda aktif...</div>';
+        document.getElementById('pastAgendaList').innerHTML = '<div class="loading">Memuat agenda lewat...</div>';
+        google.script.run
+          .withSuccessHandler(function(agendaArray) {
+            if (agendaArray.error) {
+              showError({ message: agendaArray.error });
+              displayCategorizedAgendas({error: agendaArray.error}); 
+              allLoadedAgenda = [];
+              if (calendar) calendar.removeAllEvents(); 
+              return;
+            }
+            allLoadedAgenda = agendaArray; 
+            displayCategorizedAgendas(allLoadedAgenda);
+            if (calendar) calendar.refetchEvents();
+          })
+          .withFailureHandler(function(err) {
+            showError(err);
+            displayCategorizedAgendas({error: "Gagal memuat data dari server."});
+            allLoadedAgenda = [];
+            if (calendar) calendar.removeAllEvents();
+          })
+          .getAgendaData();
+      }
+
+      // isImageUrl function REMOVED as it's no longer used for direct preview
+
+      function displaySelectedAgendaDetails(agenda) {
+        var detailsDiv = document.getElementById('selectedAgendaDetails');
+        var titleH5 = document.getElementById('selectedAgendaTitle');
+        var attachmentDiv = document.getElementById('selectedAgendaAttachment'); // Div for the button
+        
+        attachmentDiv.innerHTML = ''; // Clear previous attachment button
+
+        if (agenda && agenda.namaAgenda) {
+            titleH5.textContent = agenda.namaAgenda;
+
+            if (agenda.linkFile) { 
+                let attachmentButton = document.createElement('a');
+                attachmentButton.href = agenda.linkFile;
+                attachmentButton.target = "_blank";
+                attachmentButton.rel = "noopener noreferrer";
+                attachmentButton.className = "attachment-button"; // New class for styling
+                attachmentButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-paperclip" viewBox="0 0 16 16">
+                                                <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0z"/>
+                                              </svg>Lihat Lampiran`;
+                attachmentDiv.appendChild(attachmentButton);
+            }
+
+            let tanggalLoadDetail = agenda.tanggalLoad ? new Date(agenda.tanggalLoad).toLocaleString('id-ID', { dateStyle:'full', timeStyle:'short'}) : 'Tidak ada data';
+            detailsDiv.innerHTML = `
+                <p><strong>Jenis:</strong> ${agenda.jenisAgenda || '-'}</p>
+                <p><strong>Deadline:</strong> ${agenda.deadline ? new Date(agenda.deadline).toLocaleString('id-ID', { dateStyle:'full', timeStyle:'short'}) : '-'}</p>
+                <p><strong>Dibuat pada:</strong> ${tanggalLoadDetail}</p>
+                <p><strong>PIC:</strong> ${agenda.pic || '-'}</p>
+                <p><strong>Keterangan:</strong><br>${agenda.keterangan ? agenda.keterangan.replace(/\n/g, '<br>') : '-'}</p>
+            `;
+        } else {
+            titleH5.textContent = 'Agenda Terpilih:';
+            detailsDiv.innerHTML = 'Pilih agenda dari kalender atau daftar untuk melihat detail.';
+        }
+      }
+
+      // openImageModal and closeImageModal functions REMOVED
+      // getGoogleDriveDirectImageLink function REMOVED
+
+      function populateFormForEdit(agenda) {
+        document.getElementById('formTitle').textContent = 'Edit Agenda: ' + agenda.namaAgenda;
+        document.getElementById('rowId').value = agenda.rowId;
+        document.getElementById('jenisAgenda').value = agenda.jenisAgenda;
+        document.getElementById('namaAgenda').value = agenda.namaAgenda;
+        
+        const toLocalISOString = (dateString) => {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return ''; 
+                const tzoffset = (new Date()).getTimezoneOffset() * 60000; 
+                const localISOTime = (new Date(date.getTime() - tzoffset)).toISOString().slice(0, 16);
+                return localISOTime;
+            } catch (e) {
+                console.error("Error parsing date for datetime-local:", dateString, e);
+                return ''; 
+            }
+        };
+        document.getElementById('deadline').value = toLocalISOString(agenda.deadline);
+        document.getElementById('pic').value = agenda.pic || '';
+        document.getElementById('keterangan').value = agenda.keterangan || '';
+        
+        const currentLinkFileEl = document.getElementById('currentLinkFile'); 
+        if (agenda.linkFile) { 
+            currentLinkFileEl.innerHTML = `File saat ini: <a href="${agenda.linkFile}" target="_blank">${agenda.linkFile.substring(agenda.linkFile.lastIndexOf('/') + 1)}</a>. Pilih file baru untuk mengganti.`;
+            currentLinkFileEl.style.display = 'block';
+        } else {
+            currentLinkFileEl.style.display = 'none';
+            currentLinkFileEl.innerHTML = '';
+        }
+        document.getElementById('lampiranFile').value = ''; 
+
+        var deleteButton = document.getElementById('deleteButton');
+        deleteButton.style.display = 'inline-block';
+        
+        const isSistemAgenda = agenda.pic && agenda.pic.toString().toLowerCase() === 'sistem';
+        deleteButton.disabled = isSistemAgenda;
+        document.getElementById('simpanButton').disabled = isSistemAgenda;
+        deleteButton.title = isSistemAgenda ? "Agenda sistem tidak dapat diubah atau dihapus." : "";
+        document.getElementById('simpanButton').title = isSistemAgenda ? "Agenda sistem tidak dapat diubah." : "";
+
+        currentEditingRowId = agenda.rowId;
+        document.getElementById('namaAgenda').focus();
+      }
+
+      function clearForm() {
+        document.getElementById('formTitle').textContent = 'Tambah Agenda Baru';
+        document.getElementById('agendaForm').reset();
+        document.getElementById('rowId').value = '';
+        document.getElementById('currentLinkFile').style.display = 'none'; 
+        document.getElementById('currentLinkFile').innerHTML = '';
+        document.getElementById('selectedAgendaAttachment').innerHTML = ''; // Clear attachment button
+        document.getElementById('selectedAgendaTitle').textContent = 'Agenda Terpilih:';
+        document.getElementById('selectedAgendaDetails').innerHTML = 'Pilih agenda dari kalender atau daftar.';
+
+
+        var deleteButton = document.getElementById('deleteButton');
+        deleteButton.style.display = 'none';
+        deleteButton.disabled = false; 
+        deleteButton.title = ""; 
+        document.getElementById('simpanButton').disabled = false;
+        document.getElementById('simpanButton').title = "";
+        currentEditingRowId = null;
+      }
+
+      function submitAgenda() {
+        const clientAgendaData = {
+          rowId: document.getElementById('rowId').value || null,
+          jenisAgenda: document.getElementById('jenisAgenda').value,
+          namaAgenda: document.getElementById('namaAgenda').value,
+          deadline: document.getElementById('deadline').value,
+          pic: document.getElementById('pic').value,
+          keterangan: document.getElementById('keterangan').value,
+          linkFile: document.getElementById('currentLinkFile').querySelector('a') ? document.getElementById('currentLinkFile').querySelector('a').href : null,
+          linkTambahan: null 
+        };
+
+        if (!clientAgendaData.namaAgenda || !clientAgendaData.deadline) {
+          alert("Nama Agenda dan Deadline wajib diisi.");
+          return;
+        }
+
+        clientAgendaData.deadline = clientAgendaData.deadline ? new Date(clientAgendaData.deadline).toISOString() : null;
+
+        var fileInput = document.getElementById('lampiranFile');
+        var file = fileInput.files[0];
+        
+        var simpanButton = document.getElementById('simpanButton');
+        var baruButton = document.getElementById('baruButton');
+        if(simpanButton) simpanButton.disabled = true;
+        if(baruButton) baruButton.disabled = true;
+
+        var fileInfo = null;
+
+        if (file) { 
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                fileInfo = {
+                    fileName: file.name,
+                    mimeType: file.type,
+                    base64Data: e.target.result.split(',')[1] 
+                };
+                callProsesAgendaDenganFile(clientAgendaData, fileInfo);
+            };
+            reader.onerror = function(err) {
+                showError({message: "Gagal membaca file: " + err.toString()});
+                if(simpanButton) simpanButton.disabled = false;
+                if(baruButton) baruButton.disabled = false;
+            };
+            reader.readAsDataURL(file); 
+        } else {
+            callProsesAgendaDenganFile(clientAgendaData, null); 
+        }
+      }
+
+      function callProsesAgendaDenganFile(agendaDataForServer, fileDataForServer) {
+        var simpanButton = document.getElementById('simpanButton');
+        var baruButton = document.getElementById('baruButton');
+
+        google.script.run
+          .withSuccessHandler(function(response) {
+            if(simpanButton) simpanButton.disabled = false;
+            if(baruButton) baruButton.disabled = false;
+            alert(response.message);
+
+            if(response.success) {
+              loadAndDisplayAllAgenda(); 
+              clearForm();
+              
+              var targetRowId = response.newRowId || agendaDataForServer.rowId;
+              
+              setTimeout(() => {
+                var newlyHandledAgenda = allLoadedAgenda.find(a => a.rowId === targetRowId);
+                if (newlyHandledAgenda) {
+                    if (response.newRowId) { 
+                        newlyHandledAgenda.tanggalLoad = response.tanggalLoad || new Date().toISOString();
+                        newlyHandledAgenda.linkFile = response.linkFile; 
+                    } else { 
+                         newlyHandledAgenda.linkFile = agendaDataForServer.linkFile; 
+                    }
+                    displaySelectedAgendaDetails(newlyHandledAgenda);
+                } else if (response.newRowId) { 
+                    displaySelectedAgendaDetails({
+                        ...agendaDataForServer, 
+                        rowId: response.newRowId, 
+                        tanggalLoad: response.tanggalLoad || new Date().toISOString(),
+                        linkFile: response.linkFile, 
+                        deadline: new Date(agendaDataForServer.deadline).toISOString() 
+                    });
+                }
+              }, 600); 
+            }
+          })
+          .withFailureHandler(function(err){
+            if(simpanButton) simpanButton.disabled = false;
+            if(baruButton) baruButton.disabled = false;
+            showError(err);
+          })
+          .prosesAgendaDenganFile(agendaDataForServer, fileDataForServer);
+      }
+
+      function deleteCurrentAgenda() {
+          if (!currentEditingRowId) {
+            alert("Pilih agenda yang akan dihapus dari daftar atau kalender terlebih dahulu.");
+            return;
+          }
+          var currentAgendaInForm = allLoadedAgenda.find(a => a.rowId === currentEditingRowId);
+          if (currentAgendaInForm && currentAgendaInForm.pic && currentAgendaInForm.pic.toString().toLowerCase() === 'sistem') {
+              alert("Agenda sistem tidak dapat dihapus.");
+              return;
+          }
+
+          if (confirm("Apakah Anda yakin ingin menghapus agenda: " + document.getElementById('namaAgenda').value + "?")) {
+            var deleteBtn = document.getElementById('deleteButton');
+            var simpanBtn = document.getElementById('simpanButton');
+            if(deleteBtn) deleteBtn.disabled = true;
+            if(simpanBtn) simpanBtn.disabled = true;
+
+            google.script.run
+              .withSuccessHandler(function(response) {
+                if(deleteBtn) deleteBtn.disabled = false;
+                if(simpanBtn) simpanBtn.disabled = false;
+                alert(response.message);
+                if(response.success) {
+                  loadAndDisplayAllAgenda(); 
+                  clearForm();
+                  displaySelectedAgendaDetails(null); 
+                }
+              })
+              .withFailureHandler(function(err){
+                  if(deleteBtn) deleteBtn.disabled = false;
+                  if(simpanBtn) simpanBtn.disabled = false;
+                  showError(err);
+              })
+              .deleteAgenda(currentEditingRowId);
+          }
+      }
+
+      function showError(error) {
+        console.error("Apps Script Error or Client-Side Error: ", error);
+        let message = "Terjadi kesalahan.";
+        if (error && error.message) {
+            message = error.message;
+        } else if (typeof error === 'string') {
+            message = error;
+        } else {
+            try { message = JSON.stringify(error); } catch (e) { /* ignore */ }
+        }
+        alert("Terjadi kesalahan: " + message);
+      }
+    </script>
+  </body>
+</html>
