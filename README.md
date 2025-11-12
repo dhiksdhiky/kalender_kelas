@@ -1,124 +1,89 @@
 # Kalender Kelas - Google Apps Script
 
-Aplikasi kalender berbasis Google Apps Script untuk manajemen agenda kelas dengan fitur upload file lampiran.
+Aplikasi kalender buat manajemen agenda kelas, ada fitur upload file lampiran juga.
 
-## 📋 Fitur
+## Fitur
 
-- Tampilan kalender interaktif
-- Tambah, edit, dan hapus agenda
+- Kalender interaktif
+- Tambah, edit, hapus agenda
 - Upload file lampiran
-- Integrasi dengan Google Spreadsheet sebagai database
-- Akses real-time untuk semua pengguna
+- Database pakai Google Spreadsheet
+- Real-time, semua orang bisa akses
 
-## 🚀 Instalasi
+## Cara Install
 
 ### 1. Download Source Code
 
-1. Kunjungi repository: [https://github.com/dhiksdhiky/kalender_kelas](https://github.com/dhiksdhiky/kalender_kelas)
-2. Download file berikut:
-   - `kode.gs`
+a. Di GitHub: [https://github.com/dhiksdhiky/kalender_kelas](https://github.com/dhiksdhiky/kalender_kelas), download:
+   - `kode.gs` 
    - `webapp.html`
-   - Template spreadsheet (bersihkan isinya sebelum digunakan)
+   - Template spreadsheetnya (bersihkan dulu isinya sebelum dipakai)
 
-### 2. Setup Google Apps Script
+b. Buka [https://script.google.com/](https://script.google.com/) > **New project** > kasih nama projek, bebas (contoh: Agenda 505)
 
-1. Buka [https://script.google.com/](https://script.google.com/)
-2. Klik **New project**
-3. Beri nama project (contoh: "Agenda 505")
-4. Copy-paste isi `kode.gs` ke dalam `code.gs`, lalu ganti nama file menjadi `kode.gs`
-5. Buat file HTML baru dengan klik tombol **(+)**
-6. Copy-paste isi `WebApp.html` dan ganti nama file sesuai
+c. Copas isi `kode.gs` di `code.gs`, ganti nama jadi `kode.gs`
 
-### 3. Organisasi File di Google Drive
+d. Buat file HTML, klik **(+)**, copas dari file `WebApp.html` (ganti nama juga)
 
-1. Di Google Drive, cari file script yang baru dibuat
-2. Buat folder baru dan beri nama sesuai keinginan
-3. Pindahkan file script ke folder tersebut
-4. Pindahkan juga file spreadsheet ke folder yang sama
-   
-   > **Catatan:** Folder lampiran akan dibuat otomatis, tidak perlu dibuat manual
+e. Di Drive paling luar, cari file scriptnya, buat folder baru kasih nama, pindah file script ke folder baru (file spreadsheetnya juga). Folder lampiran nanti otomatis, ga perlu bikin manual.
 
-### 4. Buat Spreadsheet Database
+### 2. Buat Spreadsheet
 
-1. Di folder yang sama, buat Google Spreadsheet baru (jangan upload file Excel)
-2. Beri nama sesuai keinginan
-3. Sesuaikan nama sheet dengan template yang sudah disediakan
-4. Salin **Spreadsheet ID** dari URL
+a. Buat spreadsheet di folder, beri nama bebas. **Wajib spreadsheet ya**, bukan upload Excel yang diupload di Drive. Klik new file aja di Drive. Nama sheetnya disesuaikan sama template.
 
-   **Contoh URL:**
+b. Salin (Copy) **ID Spreadsheet** dari URL. ID ini adalah bagian panjang di URL, contoh:
+
    ```
    https://docs.google.com/spreadsheets/d/1Rv1x6eeY6DXiZKX-hOSTkH9LcsD07ZymeOV51CTt9gI/edit
    ```
    
-   Copy bagian yang ditebalkan: **1Rv1x6eeY6DXiZKX-hOSTkH9LcsD07ZymeOV51CTt9gI**
+   Copy text yang **tebel** (1Rv1x6eeY6DXiZKX-hOSTkH9LcsD07ZymeOV51CTt9gI)
 
-## ⚙️ Konfigurasi
+### 3. Konfigurasi
 
-### 1. Update Spreadsheet ID di kode.gs
+a. Buka lagi `kode.gs`, ganti ID spreadsheet dari URL spreadsheet (tahap 2b)
 
-Buka file `kode.gs` dan ganti Spreadsheet ID dengan ID yang sudah disalin:
+   ```javascript
+   var SPREADSHEET_ID = "PASTE_ID_SPREADSHEET_DISINI";
+   ```
 
-```javascript
-var SPREADSHEET_ID = "PASTE_ID_SPREADSHEET_DISINI";
-```
+b. Buka `WebApp.html`, baris 366, ganti link spreadsheet sesuai spreadsheet database
 
-### 2. Update Link Spreadsheet di WebApp.html
+   ```javascript
+   // Baris 366
+   var spreadsheetUrl = "https://docs.google.com/spreadsheets/d/PASTE_ID_DISINI/edit";
+   ```
 
-Buka file `WebApp.html`, cari baris 366, dan ganti link spreadsheet:
+c. **Deploy** > **New deployment** > **Who has access: Everyone** > **Deploy** > klik URL nya, selesai
 
-```javascript
-// Baris 366
-var spreadsheetUrl = "https://docs.google.com/spreadsheets/d/PASTE_ID_SPREADSHEET_DISINI/edit";
-```
+d. Kalau ada minta authorization, klik yes yes, lanjut lanjut, allow allow aja
 
-### 3. Deploy Web App
-
-1. Klik **Deploy** > **New deployment**
-2. Pilih **Web app**
-3. Pada **Who has access**, pilih **Anyone** atau **Everyone**
-4. Klik **Deploy**
-5. Copy URL yang diberikan
-6. Jika diminta authorization, klik **Allow** dan berikan izin yang diperlukan
-
-## 🧪 Testing
-
-Sebelum membagikan aplikasi ke pengguna lain, lakukan testing berikut:
+## Tes-tes Sebelum Share
 
 ### 1. Tampilan Awal
 
-Pastikan aplikasi menampilkan kalender dengan benar
+Kurang lebih tampilannya seperti kalender dengan daftar agenda
 
-### 2. Test Fitur Utama
+### 2. Tes Fitur
 
-- ✅ **Tambah agenda** (termasuk upload file lampiran)
-- ✅ **Edit agenda**
-- ✅ **Hapus agenda**
+- Tes fitur **tambah** (termasuk upload file)
+- Tes **edit**
+- Tes **hapus**
 
-### 3. Verifikasi Database
+### 3. Cek Database
 
-1. Klik tombol **"Buka Sheet"** di aplikasi
-2. Cek apakah data berhasil masuk ke spreadsheet
+- Cek di spreadsheet (tombol "Buka Sheet"), untuk cek apakah data masuk database
 
-### 4. Verifikasi Tampilan Detail
+### 4. Cek Detail Agenda
 
-1. Klik salah satu agenda di kalender
-2. Periksa deskripsi di bagian bawah kalender
-3. Jika ada file lampiran, klik untuk memastikan terbuka di tab baru
+- Kalau sudah masuk, klik salah satu agenda di kalender
+- Cek di bagian deskripsi bagian bawah kalender, cek apakah sudah sesuai
+- Termasuk cek kalau ada file lampiran (klik harus kebuka tab baru)
 
-## 📝 Catatan
+## Catatan
 
-- Pastikan menggunakan Google Spreadsheet, **bukan** file Excel yang diupload ke Drive
-- Nama sheet harus sesuai dengan template yang disediakan
-- Folder lampiran akan dibuat otomatis saat pertama kali upload file
-
-## 🤝 Kontribusi
-
-Jika menemukan bug atau ada pertanyaan, silakan buka issue di repository ini.
-
-## 📄 Lisensi
-
-Project ini dibuat untuk keperluan manajemen agenda kelas.
+Kalau ada yang kurang atau bingung, ditanyain aja bang. Semoga bermanfaat! 🙏
 
 ---
 
-**Selamat menggunakan!** Jika ada yang kurang jelas atau butuh bantuan, jangan ragu untuk bertanya.
+Selamat pakai! ✨
